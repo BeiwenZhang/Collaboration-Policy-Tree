@@ -1,0 +1,11 @@
+.git
+.agents
+.codex
+results
+rendered_replays
+src1/rendered_replays
+src1/models
+human_ai_demo/data
+**/__pycache__
+**/*.pyc
+**/*.log

@@ -1,0 +1,13 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: human_ai_demo/server/Dockerfile
+    environment:
+      FLASK_ENV: ${BUILD_ENV:-production}
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${HOST_PORT:-8080}:5000"
+    volumes:
+      - ./data:/app/data
+      - ../src1/policy:/workspace/src1/policy:ro
+    restart: unless-stopped

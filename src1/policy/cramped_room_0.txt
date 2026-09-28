@@ -1,0 +1,80 @@
+def PredictTeammateThenPlan(state):
+    # Extract state variables for convenience
+    self_hold = state['hold'][0]
+    teammate_hold = state['hold'][1]
+    pots = state['pot']
+    any_soup_ready = state['any_soup_ready']
+    any_pot_not_full = state['any_pot_not_full']
+    teammate_last_completed_skill = state['teammate_last_completed_skill']
+    teammate_last_inferred_skill = state['teammate_last_inferred_skill']
+    self_last_skill = state['self_last_skill']
+
+    # Helper to count onions in pots
+    def pot_with_two_onions():
+        return any(pot['count'] == 2 and pot['state'] == 'idle' for pot in pots)
+
+    # Partner Inference Tree
+    if teammate_hold == 'soup':
+        inferred_teammate_current_skill = 'deliver_soup'
+    elif teammate_hold == 'dish':
+        if any_soup_ready:
+            inferred_teammate_current_skill = 'fill_dish_with_soup'
+        else:
+            inferred_teammate_current_skill = 'place_obj_on_counter'
+    elif teammate_hold == 'onion':
+        if any_pot_not_full:
+            if pot_with_two_onions():
+                inferred_teammate_current_skill = 'put_onion_in_pot'
+            else:
+                inferred_teammate_current_skill = 'put_onion_in_pot'
+        else:
+            inferred_teammate_current_skill = 'place_obj_on_counter'
+    elif teammate_hold == 'empty':
+        if any_soup_ready:
+            inferred_teammate_current_skill = 'pickup_dish'
+        elif any_pot_not_full:
+            inferred_teammate_current_skill = 'pickup_onion'
+        else:
+            inferred_teammate_current_skill = None
+    else:
+        inferred_teammate_current_skill = None
+
+    # Self Skill Selection Tree
+    if self_hold == 'soup':
+        self_action_now = 'deliver_soup'
+    elif self_hold == 'dish':
+        if any_soup_ready:
+            self_action_now = 'fill_dish_with_soup'
+        else:
+            self_action_now = 'place_obj_on_counter'
+    elif self_hold == 'onion':
+        if any_pot_not_full:
+            if pot_with_two_onions():
+                if inferred_teammate_current_skill == 'put_onion_in_pot':
+                    self_action_now = 'put_onion_in_pot'
+                else:
+                    self_action_now = 'place_obj_on_counter'
+            else:
+                self_action_now = 'put_onion_in_pot'
+        else:
+            self_action_now = 'place_obj_on_counter'
+    elif self_hold == 'empty':
+        if any_soup_ready:
+            if inferred_teammate_current_skill == 'fill_dish_with_soup' or teammate_hold == 'dish':
+                self_action_now = 'pickup_onion'
+            else:
+                self_action_now = 'pickup_dish'
+        elif any_pot_not_full:
+            if pot_with_two_onions():
+                if inferred_teammate_current_skill == 'put_onion_in_pot':
+                    self_action_now = 'pickup_onion'
+                else:
+                    self_action_now = 'pickup_onion'
+            else:
+                self_action_now = 'pickup_onion'
+        else:
+            self_action_now = None
+    else:
+        self_action_now = None
+
+    return inferred_teammate_current_skill, self_action_now

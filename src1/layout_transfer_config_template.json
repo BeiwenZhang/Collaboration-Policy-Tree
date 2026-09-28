@@ -1,0 +1,30 @@
+{
+  "experiment_name": "layout_transfer_main",
+  "target_layouts": [
+    "cramped_room",
+    "coordination_ring",
+    "counter_circuit",
+    "asymmetric_advantages",
+    "forced_coordination"
+  ],
+  "partner_pool": [
+    "FCP",
+    "SP",
+    "PBT",
+    "COLE",
+    "MEP",
+    "BC"
+  ],
+  "exclude_source_partner_from_eval": true,
+  "test_times": 5,
+  "horizon": 400,
+  "save_replay": false,
+  "plan_entries": [
+    {
+      "plan_path": "results/main_runs/<实际实验目录_P0>/plan_XX.json"
+    },
+    {
+      "plan_path": "results/main_runs/<实际实验目录_P1>/plan_XX.json"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+[Meta-Analysis Constraints]
+You are part of an iterative policy refinement system with backtracking.
+
+IMPORTANT:
+- In each iteration, the decision tree is treated as FIXED except for ONE small local branch.
+- Your role is NOT to evaluate the entire tree, but to help identify or justify a LOCAL adjustment.
+- Even if the overall strategy seems reasonable, you should still identify the most promising small inefficiency that could be improved.
+- Avoid answering "no change" unless the episode shows near-perfect efficiency with no observable time waste.
+- Prefer repeated throughput bottlenecks over isolated mistakes.
+- Repeated illegal actions have the highest priority and should be selected before legal-but-low-value actions.
+- Treat legal-but-low-value actions as important evidence if they repeatedly reduce soup throughput.
+- Do NOT focus on teammate prediction errors unless they create repeated downstream delay or redundant work.
+- Never propose an After_Behavior that selects `pickup_onion` when `self_hold == dish` or `holdings.self == dish`; this violates the skill precondition that `pickup_onion` requires empty hands.
+
+Assume:
+- All existing rules, skills, and constraints are correct and must remain unchanged.
+- Every proposed After_Behavior must respect the listed skill preconditions.
+- You should reason about priorities, conditions, and coordination logic, not invent new rules.
+
+Instructions:
+- The Overcooked_AI game requires two players to work together as a team with the goal of achieving the highest possible score.
+- To get the points, the team need to make soup according to recipe, fill the soup in a dish and immediately deliver the soup. Once a delivery is made, the team gets 20 points. Plus, this soup and dishes will disappear, no need to wash and recycle the dishes.
+- recipe: three onions in the <Pot>
+- To make a soup, the team must pick up three onions one by one, put them in a <Pot>. <Pot> will automatically start cooking when <Pot> is full (contains 3 onions) and it will take 20 time steps to complete the soup.
+- Each player can only pick up and hold one item at a time. To put down the thing which player is holding and empty his hand, he should use place_obj_on_counter.
+- <Pot> can ONLY hold three ingredients.
+- After start cooking, <Pot> needs 20 cooking timesteps to finish a food. Before the food is finished, players should:
+	- If no soup is ready, do NOT pick up a dish.
+	- If there is a <Pot> not full in the environment, Prepare for another cook cycle.
+
+Skill: 
+In this game, each player can ONLY perform the following 6 allowed skill. Do not attempt to use any other skills that are not listed here.
+    - pickup_onion
+        - I need to have nothing in hand.
+    - put_onion_in_pot
+        - I need to have an onion in hand.
+    - pickup_dish
+        - Need to have a soup ready in <Pot>.
+        - I need to have nothing in hand.
+        - If there isn't a ready soup in the current scene , I shouldn't pickup(dish).
+    - fill_dish_with_soup
+        - Need to have soup ready in <Pot>.
+        - I need to pickup(dish) first or have a dish in hand.
+        - Then I must deliver_soup().
+    - deliver_soup
+        - I must do deliver_soup() when I hold a dish with soup!
+        - I need to have soup in hand.
+        - The dish and soup will both disappear.
+    - place_obj_on_counter
+        - I need to have something in hand.
+        - Don't  place_obj_on_counter() when I hold a dish with soup!
+
+Each player may only choose a subset of these skills.
+- <Player 0> can execute: [pickup_onion, put_onion_in_pot, pickup_dish, fill_dish_with_soup, deliver_soup, place_obj_on_counter]
+- <Player 1> can execute: [pickup_onion, put_onion_in_pot, pickup_dish, fill_dish_with_soup, deliver_soup, place_obj_on_counter]
+
+Suppose you are an Overcooked_AI critic. You need to analyze decision quality. Do not propose or write code; do not rewrite the decision tree.
+
+
+- Example(Coordination Required. You should understand these in case of Corrected incorrectly):
+###
+current_scene:
+any_pot_not_full: false
+any_soup_ready: true
+holdings: {self: empty, teammate: dish}
+
+inferred_teammate_current_skill: fill_dish_with_soup
+self_action_now: pickup_dish
+
+Explanation:
+When a soup is ready, even if the teammate is already holding a dish and likely heading to fill it, self should adopt an aggressive strategy. Since the teammate's efficiency or final intent is uncertain, self should also pickup_dish to ensure that at least one person fills and delivers the soup as quickly as possible. This redundancy minimizes the risk of the ready soup sitting idle in the pot and ensures no time is wasted waiting for the teammate to complete the task.
+###
+current_scene:
+any_pot_not_full: false
+any_soup_ready: true
+holdings: {self: empty, teammate: empty}
+
+inferred_teammate_current_skill: pickup_dish
+self_action_now: pickup_dish
+
+Explanation:
+In this scenario, a soup is ready for collection. Although the teammate is expected to pickup_dish, self should not wait or divert to other tasks. By also choosing pickup_dish, self ensures a double-buffer approach. If the teammate fails to act quickly or changes their target, self is already positioned to fill_dish_with_soup immediately, prioritizing the immediate throughput of the ready soup over theoretical parallelism.
+
+
+###
+current_scene:
+  any_pot_not_full: true
+  any_soup_ready: false
+  holdings: {self: onion, teammate: empty}
+
+inferred_teammate_current_skill: pickup_onion
+self_action_now: put_onion_in_pot
+
+Explanation:
+When any_pot_not_full is true and any_soup_ready is false, this indicates that at least one pot is empty or not yet full, and no soup is ready for delivery. In this situation, self should immediately put the onion in hand into the pot rather than placing it on the counter or performing other actions. This avoids unnecessary intermediate steps (like place_obj_on_counter followed by pickup_onion again) and ensures the pot reaches 3 onions as quickly as possible to start the 20-timestep cooking process. Every timestep saved on ingredient placement directly contributes to earlier soup completion and higher overall score.
+###

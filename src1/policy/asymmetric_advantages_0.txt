@@ -1,0 +1,85 @@
+def PredictTeammateThenPlan(state):
+    # Helper function to infer teammate's current skill
+    def infer_teammate_skill(state):
+        if state['teammate_last_completed_skill'] == 'pickup_onion':
+            return 'put_onion_in_pot'
+        elif state['teammate_last_completed_skill'] == 'put_onion_in_pot':
+            return 'pickup_onion'
+        elif state['teammate_last_completed_skill'] == 'pickup_dish':
+            return 'fill_dish_with_soup'
+        elif state['teammate_last_completed_skill'] == 'fill_dish_with_soup':
+            return 'deliver_soup'
+        elif state['teammate_last_completed_skill'] == 'deliver_soup':
+            return 'pickup_onion'
+        elif state['teammate_last_completed_skill'] == 'place_obj_on_counter':
+            return 'pickup_onion'
+        elif state['teammate_last_completed_skill'] is None:
+            return state['teammate_last_inferred_skill']
+        else:
+            return 'pickup_onion'
+
+    # Helper function to determine self's next action
+    def determine_self_action(state, inferred_teammate_skill):
+        self_hold = state['hold'][0]
+        teammate_hold = state['hold'][1]
+        pots = state['pot']
+        any_soup_ready = state['any_soup_ready']
+        any_pot_not_full = state['any_pot_not_full']
+
+        # 1. If holding soup, deliver it
+        if self_hold == 'soup':
+            return 'deliver_soup'
+
+        # 2. If holding a dish
+        if self_hold == 'dish':
+            if any_soup_ready:
+                return 'fill_dish_with_soup'
+            else:
+                if teammate_hold == 'dish':
+                    return 'place_obj_on_counter'
+                else:
+                    return 'pickup_onion'
+
+        # 3. If any soup is ready
+        if any_soup_ready:
+            if self_hold == 'empty' and teammate_hold != 'dish':
+                return 'pickup_dish'
+            elif self_hold == 'dish' and teammate_hold == 'dish':
+                return 'place_obj_on_counter'
+            else:
+                return 'pickup_onion'
+
+        # 4. If any pot is not full
+        if any_pot_not_full:
+            if self_hold == 'onion':
+                return 'put_onion_in_pot'
+            elif self_hold == 'empty':
+                return 'pickup_onion'
+            elif self_hold == 'dish':
+                return 'place_obj_on_counter'
+
+        # 5. If no pot is not full and no soup is ready
+        if not any_pot_not_full and not any_soup_ready:
+            if self_hold == 'onion':
+                if inferred_teammate_skill == 'put_onion_in_pot':
+                    return 'place_obj_on_counter'
+                else:
+                    return 'pickup_onion'
+            elif self_hold == 'empty':
+                return 'pickup_onion'
+            elif self_hold == 'dish':
+                if teammate_hold == 'dish':
+                    return 'place_obj_on_counter'
+                else:
+                    return 'pickup_onion'
+
+        # 6. Default action
+        return 'pickup_onion'
+
+    # Infer teammate's current skill
+    inferred_teammate_current_skill = infer_teammate_skill(state)
+
+    # Determine self's next action
+    self_action_now = determine_self_action(state, inferred_teammate_current_skill)
+
+    return inferred_teammate_current_skill, self_action_now

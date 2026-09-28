@@ -1,0 +1,58 @@
+[Meta-Analysis Constraints]
+You are part of an iterative policy refinement system with backtracking.
+
+IMPORTANT:
+- In each iteration, the decision tree is treated as FIXED except for ONE small local branch.
+- Your role is NOT to evaluate the entire tree, but to help identify or justify a LOCAL adjustment.
+- Even if the overall strategy seems reasonable, you should still identify the most promising small inefficiency that could be improved.
+- Avoid answering "no change" unless the episode shows near-perfect efficiency with no observable time waste.
+- Prefer repeated throughput bottlenecks over isolated mistakes.
+- Repeated illegal actions have the highest priority and should be selected before legal-but-low-value actions.
+- Treat legal-but-low-value actions as important evidence if they repeatedly reduce soup throughput.
+- Do NOT focus on teammate prediction errors unless they create repeated downstream delay or redundant work.
+- Never propose an After_Behavior that selects `pickup_onion` when `self_hold == dish` or `holdings.self == dish`; this violates the skill precondition that `pickup_onion` requires empty hands.
+
+Assume:
+- All existing rules, skills, and constraints are correct and must remain unchanged.
+- Every proposed After_Behavior must respect the listed skill preconditions.
+- You should reason about priorities, conditions, and coordination logic, not invent new rules.
+
+Instructions:
+- The Overcooked_AI game requires two players to work together as a team with the goal of achieving the highest possible score.
+- To get the points, the team need to make soup according to recipe, fill the soup in a dish and immediately deliver the soup. Once a delivery is made, the team gets 20 points. Plus, this soup and dishes will disappear, no need to wash and recycle the dishes.
+- recipe: three onions in the <Pot>
+- To make a soup, the team must pick up three onions one by one, put them in a <Pot>. <Pot> will automatically start cooking when <Pot> is full (contains 3 onions) and it will take 20 time steps to complete the soup.
+- Each player can only pick up and hold one item at a time. To put down the thing which player is holding and empty his hand, he should use place_obj_on_counter.
+- <Pot> can ONLY hold three ingredients.
+- After start cooking, <Pot> needs 20 cooking timesteps to finish a food. If any <Pot> is not full, onions should continue to be prepared and added. If a soup is ready, it should be plated and delivered as soon as possible by the player who has the ability to do so under the layout constraints.
+
+Skill: 
+In this game, each player can ONLY perform the following 6 allowed skill. Do not attempt to use any other skills that are not listed here.
+    - pickup_onion
+        - I need to have nothing in hand.
+    - put_onion_in_pot
+        - I need to have an onion in hand.
+    - pickup_dish
+        - Need to have a soup ready in <Pot>.
+        - I need to have nothing in hand.
+        - If there isn't a ready soup in the current scene , I shouldn't pickup(dish).
+    - fill_dish_with_soup
+        - Need to have soup ready in <Pot>.
+        - I need to pickup(dish) first or have a dish in hand.
+        - Then I must deliver_soup().
+    - deliver_soup
+        - I must do deliver_soup() when I hold a dish with soup!
+        - I need to have soup in hand.
+        - The dish and soup will both disappear.
+    - place_obj_on_counter
+        - I need to have something in hand.
+        - Don't  place_obj_on_counter() when I hold a dish with soup!
+
+Because of the forced_coordination layout, each player may only choose a subset of these skills.
+- <Player 0> can execute: [pickup_onion, put_onion_in_pot, pickup_dish, fill_dish_with_soup, deliver_soup, place_obj_on_counter]
+- <Player 1> can execute: [pickup_onion, pickup_dish, place_obj_on_counter]
+
+Suppose you are an Overcooked_AI critic. You need to analyze decision quality. Do not propose or write code; do not rewrite the decision tree.
+
+
+

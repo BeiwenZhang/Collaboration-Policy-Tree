@@ -1,0 +1,58 @@
+{
+  "layouts": ["Cramped\nRm.", "Coord.\nRing", "CT.\nCircuit", "Asymm.\nAdv.", "Forced\nCoord."],
+  "methods": ["ProAgent", "CausalPlan", "Co-pi-Tree"],
+  "method_labels": {
+    "ProAgent": "ProAgent",
+    "CausalPlan": "CausalPlan",
+    "Co-pi-Tree": "Co-$\\pi$-Tree (Ours)"
+  },
+  "colors": {
+    "ProAgent": "#6F7BC0",
+    "CausalPlan": "#DF6262",
+    "Co-pi-Tree": "#6EAD68"
+  },
+  "metrics": [
+    {
+      "key": "query_count",
+      "ylabel": "Number of Queries",
+      "caption": "(a) Number of Queries comparison",
+      "yscale": "log2",
+      "mean": {
+        "ProAgent": [212, 42, 48, 138, 153],
+        "Co-pi-Tree": [40, 40, 40, 40, 40],
+        "CausalPlan": [409, 88, 132, 274, 298]
+      },
+      "max": {
+        "ProAgent": [225, 58.3, 55, 150, 158.3],
+        "Co-pi-Tree": [40, 40, 40, 40, 40],
+        "CausalPlan": [450, 104.2, 150, 300, 325]
+      },
+      "min": {
+        "ProAgent": [191.7, 29.2, 40, 126.7, 139.2],
+        "Co-pi-Tree": [40, 40, 40, 40, 40],
+        "CausalPlan": [366.7, 75, 116.7, 250, 275]
+      }
+    },
+    {
+      "key": "latency_seconds",
+      "ylabel": "Time (s)",
+      "caption": "(b) Test time comparison",
+      "yscale": "log2",
+      "mean": {
+        "ProAgent": [3252, 694, 692, 1700, 2231],
+        "Co-pi-Tree": [50, 25, 28, 37, 43],
+        "CausalPlan": [1051, 557, 420, 1055, 1153]
+      },
+      "max": {
+        "ProAgent": [3500, 800, 880, 2012, 2500],
+        "Co-pi-Tree": [60, 30, 35, 40, 50],
+        "CausalPlan": [1150, 620, 500, 1160, 1260]
+      },
+      "min": {
+        "ProAgent": [2800, 600, 570, 1520, 2000],
+        "Co-pi-Tree": [40, 20, 25, 30, 35],
+        "CausalPlan": [950, 500, 360, 950, 1040]
+      }
+    }
+  ]
+}

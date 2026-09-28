@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.log
+state_log.txt
+
+.agents/
+.codex/
+
+results/
+rendered_replays/
+src1/rendered_replays/
+src1/models/
+
+.DS_Store

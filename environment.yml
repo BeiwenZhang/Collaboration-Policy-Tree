@@ -1,0 +1,10 @@
+name: co-pi-Tree
+channels:
+  - defaults
+dependencies:
+  - python=3.7.16
+  - pip=22.3.1
+  - setuptools=65.6.3
+  - wheel=0.38.4
+  - mpi4py=3.1.4
+  - mpich=3.3.2

@@ -1,0 +1,65 @@
+Instructions:
+You are an Overcooked_AI coder. Two players cooperate to maximize score by cooking onion soup (3 onions per pot), filling a dish, and delivering (+20). Pots auto-cook when full for 20 timesteps. Each player holds at most one item. No movement/location logic is needed here.
+
+Because of the forced_coordination layout, each player may only choose a subset of these skills. Each skill must be written exactly in the snake_case format listed below.
+- Teammate <Player 0> can execute: [pickup_onion, put_onion_in_pot, pickup_dish, fill_dish_with_soup, deliver_soup, place_obj_on_counter]
+- I <Player 1> can ONLY execute: [pickup_onion, pickup_dish, place_obj_on_counter]
+**CAUTION**: I am Player1 and teammate is Player0, so PAY ATTENTION: **self_hold = state['hold'][1]**!!!!!!
+
+Suppose you are an assistant who is proficient in the overcooked_ai game. Your goal is to control <Player 1> and cooperate with <Player 0> who is controlled by a certain strategy in order to get a high score.
+- <Player 0> and <Player 1> cannot communicate. 
+- You cannot use move actions and don't use the location information in the observation.
+
+- You will be given a function description (a textual decision tree) in this exact format:
+###
+FunctionDescription:
+  Name: PredictTeammateThenPlan
+  Inputs:
+    - current_scene:
+        - holdings: {self: empty/onion/dish/soup, teammate: empty/onion/dish/soup}
+        - pots: for each <Pot>: onion_count: {0,1,2,3}, state: {idle,cooking,ready}, timers
+        - derived flags: any_soup_ready, any_pot_not_full
+        - num_empty_counters: integer (p.s. describes the number of remaining available empty shared counters)
+        - num_onion_counters: integer (p.s. describes the number of shared counters that have **already** placed onions)
+        - num_dish_counters: integer (p.s. describes the number of shared counters that have **already** placed dishes)
+    - self_last_skill: one of the 6 skills or None
+  Outputs:
+    - self_action_now: one of the 4 skills
+
+  Self Skill Selection Tree:
+    (textual if–else logic)
+###
+
+- You need to implement the decision tree as Python 3 using explicit if/elif logic
+- Implement tiny helpers if useful (e.g., _legalize(action, state_dict) to enforce the hard legality rules and apply minimal fallbacks like freeing mismatched items with place_obj_on_counter or choosing onion chain).
+- Do not import external packages.
+- Do not produce movement or location logic.
+- Do not invent new skills or change their spelling.
+- Read `num_empty_counters` directly from state when deciding whether `place_obj_on_counter` is legal.
+- Never assume an empty counter exists.
+- If `self_hold` is not `empty`, never emit `pickup_onion` or `pickup_dish`.
+- If `num_empty_counters == 0`, never emit `place_obj_on_counter`.
+- In forced_coordination, if any pot is already full, cooking, or ready and `self_hold == 'empty'`, prefer `pickup_dish` over `pickup_onion` unless the tree explicitly says otherwise.
+
+- State input format:
+- The function's input is a Python dictionary with this exact shape:
+###
+state_dict = {
+    'hold': [None, None],  # [self_hold, teammate_hold] each in {'empty','onion','dish','soup'}
+    'pot': [],             # list of dicts, one per pot: {'count': int, 'state': 'idle'|'cooking'|'ready', 'timers': int|None}
+    'any_soup_ready': None,       # bool
+    'any_pot_not_full': None,     # bool
+    'num_empty_counters': 0,      # integer
+    'num_onion_counters': 0,      # integer
+    'num_dish_counters':0,        # integer 
+
+    'self_last_skill': None,                 # str|None; one of the 6 skills or None
+}
+###
+
+- Required output format:
+```python
+def PredictTeammateThenPlan(state):
+    ...
+    return self_action_now
+```

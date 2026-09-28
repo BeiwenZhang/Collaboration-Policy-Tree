@@ -1,0 +1,59 @@
+def PredictTeammateThenPlan(state):
+    # Helper function to infer teammate's current skill
+    def infer_teammate_skill(state):
+        teammate_hold = state['hold'][0]  # Teammate's holding status
+        teammate_last_skill = state['teammate_last_inferred_skill']
+        any_soup_ready = state['any_soup_ready']
+        any_pot_not_full = state['any_pot_not_full']
+
+        if teammate_hold == "onion":
+            return "put_onion_in_pot"
+        elif teammate_hold == "dish":
+            if any_soup_ready:
+                return "fill_dish_with_soup"
+            else:
+                return "place_obj_on_counter"
+        elif teammate_hold == "soup":
+            return "deliver_soup"
+        elif teammate_hold == "empty":
+            if any_soup_ready:
+                return "pickup_dish"
+            elif any_pot_not_full:
+                return "pickup_onion"
+            else:
+                return "place_obj_on_counter"
+        elif teammate_last_skill in ["pickup_onion", "put_onion_in_pot", "pickup_dish", "fill_dish_with_soup", "deliver_soup"]:
+            return teammate_last_skill
+        else:
+            return "place_obj_on_counter"
+
+    # Helper function to determine self action
+    def determine_self_action(state):
+        self_hold = state['hold'][1]  # Self holding status
+        any_soup_ready = state['any_soup_ready']
+        any_pot_not_full = state['any_pot_not_full']
+
+        if self_hold == "soup":
+            return "deliver_soup"
+        elif self_hold == "dish":
+            if any_soup_ready:
+                return "fill_dish_with_soup"
+            else:
+                return "place_obj_on_counter"
+        elif self_hold == "onion":
+            return "put_onion_in_pot"
+        elif self_hold == "empty":
+            if any_soup_ready:
+                return "pickup_dish"
+            elif any_pot_not_full:
+                return "pickup_onion"
+            else:
+                return "place_obj_on_counter"
+        else:
+            return "place_obj_on_counter"
+
+    # Main logic
+    inferred_teammate_current_skill = infer_teammate_skill(state)
+    self_action_now = determine_self_action(state)
+
+    return inferred_teammate_current_skill, self_action_now

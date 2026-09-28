@@ -1,0 +1,85 @@
+def PredictTeammateThenPlan(state):
+    # Helper function to determine legality and fallback to minimal valid actions
+    def _legalize(action, state):
+        self_hold = state['hold'][1]
+        if action == 'deliver_soup' and self_hold != 'soup':
+            return 'place_obj_on_counter'
+        if action == 'fill_dish_with_soup' and self_hold != 'dish':
+            return 'place_obj_on_counter'
+        if action == 'put_onion_in_pot' and self_hold != 'onion':
+            return 'place_obj_on_counter'
+        if action == 'pickup_dish' and self_hold != 'empty':
+            return 'place_obj_on_counter'
+        if action == 'pickup_onion' and self_hold != 'empty':
+            return 'place_obj_on_counter'
+        return action
+
+    # Extract state variables
+    self_hold = state['hold'][1]
+    teammate_hold = state['hold'][0]
+    pots = state['pot']
+    any_soup_ready = state['any_soup_ready']
+    any_pot_not_full = state['any_pot_not_full']
+    teammate_last_inferred_skill = state['teammate_last_inferred_skill']
+
+    # Partner Inference Tree
+    if teammate_hold == 'soup':
+        inferred_teammate_current_skill = 'deliver_soup'
+    elif teammate_hold == 'dish':
+        if any_soup_ready:
+            inferred_teammate_current_skill = 'fill_dish_with_soup'
+        else:
+            inferred_teammate_current_skill = 'place_obj_on_counter'
+    elif teammate_hold == 'onion':
+        if any_pot_not_full:
+            inferred_teammate_current_skill = 'put_onion_in_pot'
+        else:
+            inferred_teammate_current_skill = 'place_obj_on_counter'
+    elif teammate_hold == 'empty':
+        if any_soup_ready:
+            inferred_teammate_current_skill = 'pickup_dish'
+        elif any_pot_not_full:
+            inferred_teammate_current_skill = 'pickup_onion'
+        else:
+            inferred_teammate_current_skill = 'pickup_dish'
+    else:
+        inferred_teammate_current_skill = None
+
+    # Self Skill Selection Tree
+    if self_hold == 'soup':
+        self_action_now = 'deliver_soup'
+    elif self_hold == 'dish':
+        if any_soup_ready:
+            self_action_now = 'fill_dish_with_soup'
+        else:
+            self_action_now = 'place_obj_on_counter'
+    elif self_hold == 'onion':
+        if any_pot_not_full:
+            self_action_now = 'put_onion_in_pot'
+        else:
+            self_action_now = 'place_obj_on_counter'
+    elif self_hold == 'empty':
+        if any_soup_ready:
+            if teammate_hold != 'dish':
+                self_action_now = 'pickup_dish'
+            else:
+                self_action_now = 'pickup_onion'
+        elif any_pot_not_full:
+            if inferred_teammate_current_skill == 'put_onion_in_pot':
+                if teammate_hold == 'onion':
+                    self_action_now = 'pickup_dish'
+                else:
+                    self_action_now = 'pickup_onion'
+            elif teammate_hold != 'onion':
+                self_action_now = 'pickup_onion'
+            else:
+                self_action_now = 'pickup_dish'
+        else:
+            self_action_now = 'pickup_dish'
+    else:
+        self_action_now = None
+
+    # Ensure the action is legal
+    self_action_now = _legalize(self_action_now, state)
+
+    return inferred_teammate_current_skill, self_action_now

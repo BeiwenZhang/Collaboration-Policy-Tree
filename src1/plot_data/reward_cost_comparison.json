@@ -1,0 +1,100 @@
+{
+  "layouts": ["Cramped\nRm.", "Coord.\nRing", "CT.\nCircuit", "Asymm.\nAdv.", "Forced\nCoord."],
+  "methods": ["ProAgent", "CausalPlan", "Co-pi-Tree"],
+  "method_labels": {
+    "ProAgent": "ProAgent",
+    "CausalPlan": "CausalPlan",
+    "Co-pi-Tree": "Co-$\\pi$-Tree (Ours)"
+  },
+  "colors": {
+    "ProAgent": "#6F7BC0",
+    "CausalPlan": "#DF6262",
+    "Co-pi-Tree": "#6EAD68"
+  },
+  "metrics": [
+    {
+      "key": "reward",
+      "title": "Reward",
+      "caption": "(a) Reward comparison",
+      "yscale": "linear",
+      "mean": {
+        "ProAgent": [169, 146, 107, 242, 45],
+        "Co-pi-Tree": [181, 168, 116, 258, 49],
+        "CausalPlan": [172, 153, 106, 239, 49.5]
+      },
+      "max": {
+        "ProAgent": [200, 200, 140, 290, 100],
+        "Co-pi-Tree": [210, 182, 148, 310, 78],
+        "CausalPlan": [200, 170, 130, 280, 120]
+      },
+      "min": {
+        "ProAgent": [140, 80, 60, 200, 0],
+        "Co-pi-Tree": [166, 153, 109, 233, 30],
+        "CausalPlan": [140, 140, 80, 200, 0]
+      }
+    },
+    {
+      "key": "tokens",
+      "title": "Tokens (k)",
+      "caption": "(b) Token comparison",
+      "yscale": "linear",
+      "mean": {
+        "ProAgent": [1349.5, 371.5, 714.5, 1558.5, 1480.5],
+        "Co-pi-Tree": [1077, 985, 1000, 1020, 1101],
+        "CausalPlan": [4945, 1488.5, 2148.5, 4759, 4261.5]
+      },
+      "max": {
+        "ProAgent": [1500, 500, 750, 1750, 1600],
+        "Co-pi-Tree": [1200, 1100, 1155, 1190, 1198],
+        "CausalPlan": [5400, 1650, 2350, 5200, 4650]
+      },
+      "min": {
+        "ProAgent": [1000, 250, 500, 1500, 1250],
+        "Co-pi-Tree": [1000, 900, 898, 912, 985],
+        "CausalPlan": [4500, 1300, 1950, 4400, 3900]
+      }
+    },
+    {
+      "key": "query_count",
+      "title": "Number of Queries",
+      "caption": "(c) Number of Queries comparison",
+      "yscale": "log2",
+      "mean": {
+        "ProAgent": [1272, 252, 288, 828, 918],
+        "Co-pi-Tree": [40, 40, 40, 40, 40],
+        "CausalPlan": [2454, 528, 792, 1644, 1788]
+      },
+      "max": {
+        "ProAgent": [1350, 350, 330, 900, 950],
+        "Co-pi-Tree": [40, 40, 40, 40, 40],
+        "CausalPlan": [2700, 625, 900, 1800, 1950]
+      },
+      "min": {
+        "ProAgent": [1150, 175, 240, 760, 835],
+        "Co-pi-Tree": [40, 40, 40, 40, 40],
+        "CausalPlan": [2200, 450, 700, 1500, 1650]
+      }
+    },
+    {
+      "key": "latency_seconds",
+      "title": "Time (s)",
+      "caption": "(d) Test time comparison",
+      "yscale": "log2",
+      "mean": {
+        "ProAgent": [3252, 694, 692, 1700, 2231],
+        "Co-pi-Tree": [50, 25, 28, 37, 43],
+        "CausalPlan": [1051, 557, 420, 1055, 1153]
+      },
+      "max": {
+        "ProAgent": [3500, 800, 880, 2012, 2500],
+        "Co-pi-Tree": [60, 30, 35, 40, 50],
+        "CausalPlan": [1150, 620, 500, 1160, 1260]
+      },
+      "min": {
+        "ProAgent": [2800, 600, 570, 1520, 2000],
+        "Co-pi-Tree": [40, 20, 25, 30, 35],
+        "CausalPlan": [950, 500, 360, 950, 1040]
+      }
+    }
+  ]
+}

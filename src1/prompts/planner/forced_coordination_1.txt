@@ -1,0 +1,72 @@
+Instructions:
+- The Overcooked_AI game requires two players to work together as a team with the goal of achieving the highest possible score.
+- To get the points, the team need to make soup according to recipe, fill the soup in a dish and immediately deliver the soup. Once a delivery is made, the team gets 20 points. Plus, this soup and dishes will disappear, no need to wash and recycle the dishes.
+- recipe: three onions in the <Pot>
+- To make a soup, the team must pick up three onions one by one, put them in a <Pot>. <Pot> will automatically start cooking when <Pot> is full (contains 3 onions) and it will take 20 time steps to complete the soup.
+- Each player can only pick up and hold one item at a time. To put down the thing which player is holding and empty his hand, he should use place_obj_on_counter.
+- <Pot> can ONLY hold three ingredients.
+- After start cooking, <Pot> needs 20 cooking timesteps to finish a food. Before the food is finished, players should:
+	- If no soup is ready, do NOT pick up a dish.
+	- If there is a <Pot> not full in the environment, Prepare for another cook cycle.
+
+Skill: 
+Because of the forced_coordination layout, I am player1 and can ONLY perform the following 4 allowed skill. Do not attempt to use any other skills that are not listed here.
+    - pickup_onion
+        - I need to have nothing in hand.
+    - pickup_dish
+        - I need to have nothing in hand.
+        - Need to have a soup ready. 
+    - place_obj_on_counter
+        - I need to have something in hand.
+        - Need to have an empty counter. 
+    - wait(1)
+        - Wait for one step and do nothing. 
+
+Because of the forced_coordination layout, each player may only choose a subset of these skills. Each skill must be written exactly in the snake_case format listed below.
+- Teammate <Player 0> can execute: [pickup_onion, put_onion_in_pot, pickup_dish, fill_dish_with_soup, deliver_soup, place_obj_on_counter]
+- I <Player 1> can ONLY execute: [pickup_onion, pickup_dish, place_obj_on_counter]
+**CAUTION**: I am Player1 and teammate is Player0, so PAY ATTENTION: **self_hold = state['hold'][1]**!!!!!!
+
+
+- There will be pot and counters in the kitchen.  
+- Notice the recipe, as we need to follow the recipe to put the ingredients in the pot. In this case, we need to put three onions in the pot to start cooking. 
+- The pot will cook for 20 timesteps and then become soup ready.
+- We should start prepare for the next soup when we are done with the current one.
+THE MOST IMPORTANT RULE:
+1. I am player1
+2. When there is no onion on the counter, I should pickup onion or put it on the counter.
+3. When there is 1 onion on the counter, I should NOT pickup onion or put it on the counter.
+4. Only when any_soup_ready and there is no dish on the counter, I pickup dish and put it on the counter.
+5. When there is 1 dish on the counter, I should NOT pickup dish.
+6. **num_empty_counters**, **num_dish_counters** and **num_onion_counters** are important! I can get the information from the input and make decisions accordingly.
+CAUTION: PAY ATTENTION TO THE COUNTER STATES!!!!!!
+
+Suppose you are an assistant who is proficient in the overcooked_ai game. Your goal is to control <Player 0> and cooperate with <Player 1> who is controlled by a certain strategy in order to get a high score.
+- <Player 0> and <Player 1> cannot communicate. 
+- You cannot use move actions and don't use the location information in the observation.
+- You need to define ONE function that is called every time step. It receives the current scene (including the kitchen, teammates status), and returns:
+    1. The inferred current skill of <Player 0>, and
+    2. Exactly one legal skill for <Player 1> now.
+
+- Required output format:
+### FunctionDescription:
+  Name: PredictTeammateThenPlan
+  Inputs:
+    - current_scene:
+        - holdings: {self: empty/onion/dish/soup, teammate: empty/onion/dish/soup}
+        - pots: for each <Pot>: onion_count: {0,1,2,3}, state: {idle,cooking,ready}, timers
+        - derived flags: any_soup_ready, any_pot_not_full
+        - num_empty_counters: integer (p.s. describes the number of remaining available empty shared counters)
+        - num_onion_counters: integer (p.s. describes the number of shared counters that have **already** placed onions)
+        - num_dish_counters: integer (p.s. describes the number of shared counters that have **already** placed dishes)
+    - teammate_last_completed_skill: one of the 6 skills or None
+    - teammate_last_inferred_skill: one of the 6 skills or None
+    - self_last_skill: one of the 6 skills or None
+  Outputs:
+    - inferred_teammate_current_skill: one of the 6 skills
+    - self_action_now: one of the 4 skills
+
+  **Partner Inference Tree**
+
+  **Self Skill Selection Tree**
+  

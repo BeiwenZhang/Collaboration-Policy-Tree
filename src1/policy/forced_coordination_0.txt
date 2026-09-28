@@ -1,0 +1,67 @@
+def PredictTeammateThenPlan(state):
+    def _infer_teammate_skill(state):
+        # Extract relevant fields
+        teammate_last_completed_skill = state['teammate_last_completed_skill']
+        teammate_last_inferred_skill = state['teammate_last_inferred_skill']
+
+        # Partner Inference Tree
+        if teammate_last_completed_skill == 'pickup_onion':
+            return 'place_obj_on_counter'
+        elif teammate_last_completed_skill == 'place_obj_on_counter':
+            return 'pickup_onion'
+        elif teammate_last_completed_skill == 'pickup_dish':
+            return 'place_obj_on_counter'
+        elif teammate_last_completed_skill is None:
+            return teammate_last_inferred_skill
+        else:
+            return teammate_last_inferred_skill
+
+    def _select_self_action(state):
+        # Extract relevant fields
+        self_hold = state['hold'][0]
+        any_soup_ready = state['any_soup_ready']
+        any_pot_not_full = state['any_pot_not_full']
+        num_onion_counters = state['num_onion_counters']
+        num_dish_counters = state['num_dish_counters']
+
+        # Self Skill Selection Tree
+        if self_hold == 'soup':
+            return 'deliver_soup'
+        elif self_hold == 'dish':
+            if any_soup_ready:
+                return 'fill_dish_with_soup'
+            else:
+                return 'place_obj_on_counter'
+        elif self_hold == 'onion':
+            if any_pot_not_full:
+                return 'put_onion_in_pot'
+            else:
+                return 'place_obj_on_counter'
+        elif self_hold == 'empty':
+            if any_soup_ready:
+                if num_dish_counters > 0:
+                    return 'pickup_dish'
+                elif num_onion_counters > 0:
+                    return 'pickup_onion'
+                else:
+                    return 'place_obj_on_counter'  # Wait fallback
+            elif any_pot_not_full:
+                if num_onion_counters > 0:
+                    return 'pickup_onion'
+                else:
+                    return 'place_obj_on_counter'  # Wait fallback
+            else:
+                if num_onion_counters > 0:
+                    return 'pickup_onion'
+                else:
+                    return 'place_obj_on_counter'  # Wait fallback
+        else:
+            return 'place_obj_on_counter'  # Default fallback
+
+    # Infer teammate's current skill
+    inferred_teammate_current_skill = _infer_teammate_skill(state)
+
+    # Decide self action
+    self_action_now = _select_self_action(state)
+
+    return inferred_teammate_current_skill, self_action_now
